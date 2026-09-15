@@ -1,0 +1,62 @@
+สร้างโปรเจกต์
+django-admin startproject myproject
+cd myproject
+
+สร้าง Virtual Environment
+python -m venv .venv
+เปิดใช้งาน venv
+.venv\Scripts\activate
+
+สร้างไฟล์ requirements
+python -m pip --version
+python -m pip freeze
+python -m pip freeze > requirements.txt
+
+ใช้คำสั่ง เพื่อติดตั้งทุกอย่างที่จำเป็นในครั้ง ใน requirements
+pip install -r requirements.txt
+
+รันเซิร์ฟเวอร์
+python manage.py runserver 80
+python manage.py tailwind start
+
+ติดตั้ง Django
+pip install django
+
+ติดตั้ง MySQL client ใน Python
+pip install mysqlclient
+
+สร้างแอป accounts สำหรับหน้าผู้ใช้จัดการผู้ใช้
+python manage.py startapp accounts
+สร้างแอป products สำหรับหน้าสินค้า
+python manage.py startapp products
+สร้างแอป dashboard สำหรับจัดการสินค้า
+python manage.py startapp dashboard
+
+สร้างผู้ดูแลระบบ (admin)
+python manage.py createsuperuser
+
+สร้างตาราง data
+python manage.py makemigrations
+python manage.py migrate
+
+********************************************************
+1. เปิด MySQL Workbench แล้วสร้างฐานข้อมูลใหม่
+CREATE DATABASE myproject CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+2.ติดตั้ง MySQL client ใน Python
+pip install mysqlclient
+
+3.ตั้งค่า DATABASES ใน settings.py
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'NAME',                         # ← ใช้ชื่อเดียวกับที่สร้างใน Workbench
+        'USER': 'root',                         # ← ชื่อผู้ใช้ MySQL
+        'PASSWORD': 'yourpassword',             # ← รหัสผ่าน
+        'HOST': '127.0.0.1',                    # หรือ 'localhost'
+        'PORT': '3306',                         # ปกติคือ 3306
+    }
+}
+
+4. ทดสอบการเชื่อมต่อ
+python manage.py migrate

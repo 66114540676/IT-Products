@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %} เพิ่มสินค้าใหม่ {% endblock %}
+
+{% block content %}
+<body class="min-h-screen flex flex-col bg-gray-100 text-gray-800">
+    <!-- Main -->
+    <main class="flex-grow container mx-auto px-4 py-10">
+        <div class="bg-white shadow-lg rounded-lg p-8 max-w-lg mx-auto">
+            <h2 class="text-2xl font-bold text-blue-600 mb-6 text-center">➕ เพิ่มสินค้าใหม่</h2>
+
+            {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                <p class="text-red-600 text-sm">{{ message }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form method="post" enctype="multipart/form-data" class="space-y-5">
+                {% csrf_token %}
+
+                <!-- กล่องอัปโหลดรูป -->
+                <div class="flex flex-col items-center mb-4">
+                    <label for="imageInput"
+                        class="w-80 h-80 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-50 relative overflow-hidden">
+
+                        <!-- ข้อความเริ่มต้น -->
+                        <span id="uploadText" class="text-gray-500">คลิกเพื่อเลือกรูป</span>
+
+                        <!-- Preview รูป -->
+                        <img id="preview" alt="Preview" class="absolute inset-0 w-full h-full object-cover hidden">
+
+                        <!-- ปุ่มลบ -->
+                        <button id="removeBtn" type="button"
+                            class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-7 h-7 items-center justify-center shadow hidden">
+                            ✕
+                        </button>
+                    </label>
+
+                    <!-- input file (ซ่อน) -->
+                    <input type="file" name="image" id="imageInput" accept="image/*" class="hidden">
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 font-medium mb-1">ชื่อสินค้า</label>
+                    <input type="text" name="name"
+                        class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                        required>
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 font-medium mb-1">รายละเอียด</label>
+                    <textarea name="description" rows="3"
+                        class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none"></textarea>
+                </div>
+
+                <!-- SPEC -->
+                <div id="specs-container" class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">คุณสมบัติสินค้า</label>
+
+                    <!-- ตัวอย่างแถวแรก -->
+                    <div class="flex space-x-2 mb-2 items-center">
+                        <input type="text" name="spec_key[]" placeholder="ชื่อสเปค เช่น Brand"
+                            class="flex-1 border px-3 py-2 rounded">
+                        <input type="text" name="spec_value[]" placeholder="ค่า เช่น AMD"
+                            class="flex-1 border px-3 py-2 rounded">
+                        <button type="button" onclick="removeSpec(this)"
+                            class="bg-red-500 text-white px-1 py-1 rounded hover:bg-red-600">
+                            ❌
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ปุ่มเพิ่มแถว -->
+                <button type="button" onclick="addSpec()"
+                    class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mb-4">➕ เพิ่มสเปค</button>
+
+                <div>
+                    <label class="block text-gray-700 font-medium mb-1">หมวดหมู่</label>
+                    <select name="category"
+                        class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                        required>
+                        <option value="" disabled selected>-- เลือกหมวดหมู่ --</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}">{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 font-medium mb-1">ราคา (บาท)</label>
+                    <input type="number" name="price" step="0.01"
+                        class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                        required>
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 font-medium mb-1">จำนวนคงเหลือ</label>
+                    <input type="number" name="stock"
+                        class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                        required>
+                </div>
+
+                <div class="flex justify-between mt-6">
+                    <a href="{% url 'dashboard:product_list' %}"
+                        class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"> กลับ</a>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                        บันทึก</button>
+                </div>
+            </form>
+        </div>
+    </main>
+    <!-- JS แสดง Preview -->
+    <script>
+        const imageInput = document.getElementById("imageInput");
+        const preview = document.getElementById("preview");
+        const removeBtn = document.getElementById("removeBtn");
+
+        imageInput.addEventListener("change", function (event) {
+            const [file] = event.target.files;
+            if (file) {
+                preview.src = URL.createObjectURL(file);
+                preview.classList.remove("hidden");
+                removeBtn.classList.remove("flex");
+            } else {
+                clearPreview();
+            }
+        });
+
+        removeBtn.addEventListener("click", function () {
+            imageInput.value = ""; // ล้างไฟล์
+            clearPreview();
+        });
+
+        function clearPreview() {
+            preview.src = "";
+            preview.classList.add("hidden");
+            removeBtn.classList.add("hidden");
+        }
+
+        // ✅ ฟังก์ชันเพิ่มแถว
+        function addSpec() {
+            const container = document.getElementById('specs-container');
+            const div = document.createElement('div');
+            div.classList.add('flex', 'space-x-2', 'mb-2', 'items-center');
+            div.innerHTML = `
+      <input type="text" name="spec_key[]" placeholder="ชื่อสเปค เช่น Brand"
+             class="flex-1 border px-3 py-2 rounded">
+      <input type="text" name="spec_value[]" placeholder="ค่า เช่น AMD"
+             class="flex-1 border px-3 py-2 rounded">
+      <button type="button" onclick="removeSpec(this)" 
+              class="bg-red-500 text-white px-1 py-1 rounded hover:bg-red-600">❌</button>
+    `;
+            container.appendChild(div);
+        }
+
+        // ✅ ฟังก์ชันลบแถว
+        function removeSpec(button) {
+            button.parentElement.remove();
+        }
+    </script>
+</body>
+{% endblock %}

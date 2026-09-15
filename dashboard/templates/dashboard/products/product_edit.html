@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %} แก้ไขสินค้า {% endblock %}
+
+{% block content %}
+
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+  <main class="flex-grow container mx-auto px-4 py-10">
+    <div class="bg-white shadow-lg rounded-xl p-8 max-w-lg mx-auto">
+      <h2 class="text-2xl font-bold text-blue-600 mb-6 text-center">✏️ แก้ไขสินค้า</h2>
+
+      <form method="post" enctype="multipart/form-data" class="space-y-5">
+        {% csrf_token %}
+
+        <!-- รูปสินค้า -->
+        <div class="flex flex-col items-center mb-4">
+          <p class="text-gray-700 font-medium mb-2">รูปสินค้า</p>
+          <div
+            class="relative w-80 h-80 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center overflow-hidden">
+            {% if product.image %}
+            <img id="preview" src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
+            {% else %}
+            <span id="uploadText" class="text-gray-500">คลิกเพื่อเลือกรูป</span>
+            <img id="preview" alt="Preview" class="w-full h-full object-cover hidden text-gray-700">
+            {% endif %}
+            <input type="file" name="image" id="imageInput" accept="image/*"
+              class="absolute inset-0 opacity-0 cursor-pointer">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 font-medium mb-1">ชื่อสินค้า</label>
+          <input type="text" name="name" value="{{ product.name }}"
+            class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 text-gray-700">
+        </div>
+
+        <div>
+          <label class="block text-gray-700 font-medium mb-1">รายละเอียด</label>
+          <textarea name="description" rows="3"
+            class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 text-gray-700">{{ product.description }}</textarea>
+        </div>
+
+        <!-- SPEC -->
+        <div id="specs-container" class="mb-4">
+          <label class="block text-gray-700 font-medium mb-2">คุณสมบัติสินค้า</label>
+
+          {% if product.specs %}
+          {% for key, value in product.specs.items %}
+          <div class="flex space-x-2 mb-2 items-center">
+            <input type="text" name="spec_key[]" value="{{ key }}" class="flex-1 border px-3 py-2 rounded text-gray-700">
+            <input type="text" name="spec_value[]" value="{{ value }}" class="flex-1 border px-3 py-2 rounded text-gray-700">
+            <button type="button" onclick="removeSpec(this)" class="bg-red-500 text-white px-1 py-1 rounded">❌</button>
+          </div>
+          {% endfor %}
+          {% endif %}
+        </div>
+
+        <button type="button" onclick="addSpec()"
+          class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mb-4">➕ เพิ่มสเปค</button>
+
+        <div>
+          <label class="block text-gray-700 font-medium mb-1">หมวดหมู่</label>
+          <select name="category"
+            class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none text-gray-700" required>
+            <option value="" disabled>-- เลือกหมวดหมู่ --</option>
+            {% for cat in categories %}
+            {% if product.category and product.category.id == cat.id %}
+            <option value="{{ cat.id }}" selected>{{ cat.name }}</option>
+            {% else %}
+            <option value="{{ cat.id }}">{{ cat.name }}</option>
+            {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 font-medium mb-1">ราคา</label>
+          <input type="number" name="price" value="{{ product.price }}"
+            class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 text-gray-700">
+        </div>
+
+        <div>
+          <label class="block text-gray-700 font-medium mb-1">จำนวนคงเหลือ</label>
+          <input type="number" name="stock" value="{{ product.stock }}"
+            class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 text-gray-700">
+        </div>
+
+        <div class="flex justify-between mt-6">
+          <a href="{% url 'dashboard:product_list' %}"
+            class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"> กลับ</a>
+          <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"> บันทึก</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    const imageInput = document.getElementById("imageInput");
+    const preview = document.getElementById("preview");
+    const uploadText = document.getElementById("uploadText");
+
+    if (imageInput) {
+      imageInput.addEventListener("change", function (event) {
+        const [file] = event.target.files;
+        if (file) {
+          preview.src = URL.createObjectURL(file);
+          preview.classList.remove("hidden");
+          if (uploadText) uploadText.classList.add("hidden");
+        }
+      });
+    }
+
+    function addSpec() {
+      const container = document.getElementById('specs-container');
+      const div = document.createElement('div');
+      div.classList.add('flex', 'space-x-2', 'mb-2', 'items-center');
+      div.innerHTML = `
+    <input type="text" name="spec_key[]" placeholder="ชื่อสเปค เช่น Brand"
+           class="flex-1 border px-3 py-2 rounded text-gray-700 placeholder-gray-400">
+    <input type="text" name="spec_value[]" placeholder="ค่า เช่น AMD"
+           class="flex-1 border px-3 py-2 rounded text-gray-700 placeholder-gray-400">
+    <button type="button" onclick="removeSpec(this)" 
+            class="bg-red-500 text-white px-1 py-1 rounded">❌</button>
+  `;
+      container.appendChild(div);
+    }
+
+    function removeSpec(button) {
+      button.parentElement.remove();
+    }
+  </script>
+
+</body>
+{% endblock %}

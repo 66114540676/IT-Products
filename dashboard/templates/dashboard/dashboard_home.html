@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8">
+  <h1 class="text-2xl font-bold text-slate-800 mb-6">Dashboard <span class="text-sm text-gray-500">(STAFF/ADMIN)</span></h1>
+
+  <!-- สรุปตัวเลข -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <!-- สินค้า -->
+    <div class="bg-white rounded-xl shadow p-5 ring-1 ring-gray-100">
+      <p class="text-sm text-gray-500">จำนวนสินค้า</p>
+      <p class="text-3xl font-extrabold text-slate-900 mt-1">{{ products_count|default:0 }}</p>
+    </div>
+
+    <!-- หมวดหมู่ -->
+    <div class="bg-white rounded-xl shadow p-5 ring-1 ring-gray-100">
+      <p class="text-sm text-gray-500">จำนวนหมวดหมู่</p>
+      <p class="text-3xl font-extrabold text-slate-900 mt-1">{{ categories_count|default:0 }}</p>
+    </div>
+
+    <!-- ผู้ใช้ -->
+    <div class="bg-white rounded-xl shadow p-5 ring-1 ring-gray-100">
+      <p class="text-sm text-gray-500">จำนวนผู้ใช้</p>
+      <p class="text-3xl font-extrabold text-slate-900 mt-1">{{ users_count|default:0 }}</p>
+    </div>
+  </div>
+
+  <!-- กล่องเมนูลัด -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- จัดการสินค้า -->
+    <a href="{% url 'dashboard:product_list' %}"
+       class="block bg-white rounded-xl shadow p-5 ring-1 ring-gray-100 hover:shadow-lg hover:ring-blue-300 transition">
+      <div class="text-lg font-bold text-slate-800">จัดการสินค้า</div>
+      <div class="text-sm text-gray-500">ดู/เพิ่ม/แก้ไข/ลบ</div>
+    </a>
+
+    <!-- จัดการหมวดหมู่ -->
+    <a href="{% url 'dashboard:category_list' %}"
+       class="block bg-white rounded-xl shadow p-5 ring-1 ring-gray-100 hover:shadow-lg hover:ring-blue-300 transition">
+      <div class="text-lg font-bold text-slate-800">จัดการหมวดหมู่</div>
+      <div class="text-sm text-gray-500">ดู/เพิ่ม/แก้ไข/ลบ</div>
+    </a>
+
+    <!-- ข้อมูลผู้ใช้ -->
+    <a href="{% url 'dashboard:user_list' %}"
+       class="block bg-white rounded-xl shadow p-5 ring-1 ring-gray-100 hover:shadow-lg hover:ring-blue-300 transition">
+      <div class="text-lg font-bold text-slate-800">ข้อมูลผู้ใช้</div>
+      <div class="text-sm text-gray-500">ดูข้อมูลผู้ใช้ทั้งหมด</div>
+    </a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %} หน้ารายละเอียดสินค้า {% endblock %}
+
+{% block content %}
+<div class="bg-gray-100 text-gray-800 min-h-[calc(100vh-8rem)] py-10">
+  <h2 class="text-2xl font-bold text-blue-600 mb-6 text-center">รายละเอียดสินค้า</h2>
+  <div class="max-w-4xl mx-auto bg-white rounded shadow-lg p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- รูปสินค้า -->
+    {% if product.image %}
+    <div class="flex justify-center items-center">
+      <img src="{{ product.image.url }}" alt="{{ product.name }}"
+           class="w-80 h-80 object-contain rounded-lg shadow-md bg-gray-100 hover:scale-105 transition-transform duration-200">
+    </div>
+    {% endif %}
+
+    <!-- ข้อมูลสินค้า -->
+    <div class="flex flex-col justify-center">
+      <h1 class="text-2xl font-bold text-blue-600 mb-2">{{ product.name }}</h1>
+
+      {% if product.description %}
+      <p class="text-gray-700 mb-4">{{ product.description }}</p>
+      {% endif %}
+
+      <p class="text-xl font-bold text-green-600 mb-2">ราคา ฿{{ product.price }}</p>
+
+      <!-- เพิ่ม span id="stockLeft" ให้ JS อ่านได้ -->
+      <p class="text-sm text-gray-500 mb-6">คงเหลือ: <span id="stockLeft">{{ product.stock }}</span> ชิ้น</p>
+
+      <!-- ฟอร์มสั่งซื้อ ครอบจำนวน + ปุ่ม (เพื่อให้ quantity ถูกส่งด้วย) -->
+      <form method="post" action="#" id="buyForm" class="space-y-4">
+        {% csrf_token %}
+
+        <!-- จำนวนสินค้า -->
+        <div class="flex items-center space-x-2">
+          <button type="button" id="btnMinus"
+                  class="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300
+                         disabled:opacity-50 disabled:cursor-not-allowed">➖</button>
+
+          <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ product.stock }}"
+                 class="w-16 text-center border rounded px-2 py-1" />
+
+          <button type="button" id="btnPlus"
+                  class="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300
+                         disabled:opacity-50 disabled:cursor-not-allowed">➕</button>
+        </div>
+
+        <!-- ปุ่ม -->
+        <div class="flex space-x-3">
+          <button id="buyBtn" type="submit"
+                  class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition cursor-pointer
+                         disabled:opacity-50 disabled:cursor-not-allowed">
+            สั่งซื้อ
+          </button>
+
+          <a href="{% url 'products:product_list' %}"
+             class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition">
+            กลับไปหน้าสินค้า
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- แสดงสเปค -->
+  {% if product.specs %}
+  <div class="max-w-4xl mx-auto bg-white rounded shadow-lg p-6 mt-6">
+    <h2 class="text-xl font-bold text-gray-800 mb-4">คุณสมบัติสินค้า</h2>
+    <table class="w-full border border-gray-200 rounded-lg">
+      <tbody>
+        {% for key, value in product.specs.items %}
+        <tr class="border-b hover:bg-gray-50">
+          <td class="w-1/3 px-4 py-2 font-medium text-gray-700 bg-gray-100">{{ key }}</td>
+          <td class="px-4 py-2 text-gray-600">{{ value }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+  (function () {
+    const stock = Number(document.getElementById('stockLeft').textContent) || 0;
+    const qty   = document.getElementById('quantity');
+    const minus = document.getElementById('btnMinus');
+    const plus  = document.getElementById('btnPlus');
+    const buy   = document.getElementById('buyBtn');
+
+    function clamp(val) {
+      if (isNaN(val)) val = 1;
+      val = Math.floor(val);
+      if (val < 1) return 1;
+      if (val > stock) return stock;
+      return val;
+    }
+
+    function updateUI() {
+      const v = Number(qty.value || 0);
+      minus.disabled = v <= 1;
+      plus.disabled  = v >= stock || stock === 0;
+      qty.disabled   = stock === 0;
+      if (buy) buy.disabled = stock === 0 || v < 1;
+    }
+
+    function decreaseQty() { qty.value = clamp(Number(qty.value) - 1); updateUI(); }
+    function increaseQty() { qty.value = clamp(Number(qty.value) + 1); updateUI(); }
+
+    minus.addEventListener('click', decreaseQty);
+    plus .addEventListener('click', increaseQty);
+
+    qty.addEventListener('input', () => {
+      qty.value = qty.value === '' ? '' : clamp(Number(qty.value));
+      updateUI();
+    });
+    qty.addEventListener('blur', () => {
+      if (qty.value === '') { qty.value = stock > 0 ? 1 : 0; updateUI(); }
+    });
+
+    // เริ่มต้น
+    if (stock === 0) { qty.value = 0; }
+    updateUI();
+  })();
+</script>
+{% endblock %}

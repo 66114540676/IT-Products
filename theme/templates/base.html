@@ -1,0 +1,157 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <!-- ===================== [HEAD: Meta & Assets] ===================== -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}ร้านขายอุปกรณ์ IT{% endblock %}</title>
+  {% tailwind_css %}
+</head>
+
+<body class="min-h-screen flex flex-col bg-gray-100 text-gray-800">
+
+  <!-- ===================== [NAVBAR: แถบเมนูด้านบน] ===================== -->
+  <!-- ย้ายมาไว้ที่ base.html เพื่อใช้ซ้ำทุกหน้า -->
+  <nav class="bg-blue-600 text-white shadow" role="navigation" aria-label="Main">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <!-- [NAVBAR/LEFT] โลโก้ -->
+      <a href="{% url 'accounts:home' %}" class="text-xl font-bold">ร้านขายอุปกรณ์ IT</a>
+
+      <!-- [NAVBAR/RIGHT] เมนูด้านขวา (ล๊อกอิน/โปรไฟล์) -->
+      <div class="flex items-center gap-6">
+        {% if user.is_authenticated %}
+        <!-- [PROFILE DROPDOWN] ปุ่มโปรไฟล์ + เมนูย่อย -->
+        <div class="relative">
+          <!-- ปุ่มเปิดเมนู -->
+          <button
+            id="avatarBtn"
+            type="button"
+            class="flex items-center gap-2 cursor-pointer select-none"
+            aria-haspopup="menu"
+            aria-expanded="false"
+            aria-controls="dropdownMenu">
+            {% if user.profile.avatar_url %}
+              <img src="{{ user.profile.avatar_url }}" alt="Avatar" class="w-9 h-9 rounded-full object-cover ring-2 ring-white">
+            {% else %}
+              <div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center ring-2 ring-white">
+                <span class="font-semibold">{{ user.username|first|upper }}</span>
+              </div>
+            {% endif %}
+            <span class="font-medium">{{ user.username }}</span>
+            <svg class="w-4 h-4 opacity-90" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+            </svg>
+          </button>
+
+          <!-- เมนูดรอปดาวน์ -->
+          <div
+            id="dropdownMenu"
+            class="absolute right-0 top-full mt-2 w-72 z-50 bg-white text-gray-800 rounded-xl shadow-2xl border border-gray-200 hidden"
+            role="menu"
+            aria-labelledby="avatarBtn">
+            <!-- header ของเมนู -->
+            <div class="flex items-center gap-3 px-4 py-3">
+              {% if user.profile.avatar_url %}
+                <img src="{{ user.profile.avatar_url }}" alt="Avatar" class="w-10 h-10 rounded-full object-cover">
+              {% else %}
+                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                  <span class="font-semibold text-blue-700">{{ user.username|first|upper }}</span>
+                </div>
+              {% endif %}
+              <div class="min-w-0">
+                <div class="font-semibold truncate">{{ user.username }}</div>
+                <div class="text-sm text-gray-500 truncate">{{ user.email }}</div>
+              </div>
+            </div>
+
+            <div class="border-t border-gray-200"></div>
+
+            <!-- ลิงก์เมนูหลัก -->
+            <a href="{% url 'accounts:home' %}" class="block px-4 py-2 hover:bg-gray-50" role="menuitem">หน้าหลัก</a>
+            <a href="{% url 'accounts:account_profile' %}" class="block px-4 py-2 hover:bg-gray-50" role="menuitem">โปรไฟล์</a>
+            <a href="{% url 'products:product_list' %}" class="block px-4 py-2 hover:bg-gray-50" role="menuitem">ดูสินค้าทั้งหมด</a>
+
+            {% if user.is_staff %}
+              <div class="border-t border-gray-200 my-1"></div>
+              <a href="{% url 'dashboard:dashboard_home' %}" class="block px-4 py-2 hover:bg-gray-50" role="menuitem">Dashboard</a>
+            {% endif %}
+
+            <div class="border-t border-gray-200 my-1"></div>
+
+            <!-- ปุ่มออกจากระบบ -->
+            <form method="post" action="{% url 'accounts:logout' %}" role="menuitem">
+              {% csrf_token %}
+              <button type="submit" class="w-full text-left px-4 py-2 hover:bg-gray-50 text-red-600 cursor-pointer">
+                ออกจากระบบ
+              </button>
+            </form>
+          </div>
+        </div>
+        {% else %}
+          <!-- ลิงก์เมื่อยังไม่ล๊อกอิน -->
+          <a href="{% url 'products:product_list' %}" class="hover:underline">หน้าสินค้า</a>
+          <a href="{% url 'accounts:login' %}" class="hover:underline">เข้าสู่ระบบ</a>
+          <a href="{% url 'accounts:register' %}" class="hover:underline">สมัครสมาชิก</a>
+        {% endif %}
+      </div> <!-- /[NAVBAR/RIGHT] -->
+    </div> <!-- /container -->
+  </nav>
+
+  <!-- ===================== [CONTENT: เนื้อหาแต่ละหน้า] ===================== -->
+  <main class="flex-grow p-6">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ===================== [FOOTER] ===================== -->
+  <footer class="bg-gray-200 text-center text-sm py-4 text-gray-800">
+    © 2025 ร้านขายอุปกรณ์ IT — All rights reserved.
+  </footer>
+
+  <!-- ===================== [SCRIPTS: จัดการ Dropdown & Interaction] ===================== -->
+  <script>
+    // ----- ตัวแปรหลัก -----
+    const btn = document.getElementById('avatarBtn');
+    const menu = document.getElementById('dropdownMenu');
+
+    // ----- ฟังก์ชันปิดเมนู -----
+    function closeMenu() {
+      if (!menu) return;
+      menu.classList.add('hidden');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
+    }
+
+    // ----- ฟังก์ชันสลับแสดง/ซ่อนเมนู -----
+    function toggleMenu(e) {
+      e.stopPropagation();
+      menu.classList.toggle('hidden');
+      btn.setAttribute('aria-expanded', menu.classList.contains('hidden') ? 'false' : 'true');
+    }
+
+    // ----- ติดตั้ง event listeners เมื่อมีปุ่มและเมนู -----
+    if (btn && menu) {
+      // เริ่มต้นปิดเมนูไว้
+      closeMenu();
+
+      // คลิกที่ปุ่ม avatar => toggle เมนู
+      btn.addEventListener('click', toggleMenu);
+
+      // คลิกที่นอกเมนู => ปิดเมนู
+      document.addEventListener('click', (e) => {
+        if (!menu.contains(e.target) && e.target !== btn && !btn.contains(e.target)) closeMenu();
+      });
+
+      // โหลดหน้าใหม่/กด back-forward cache => ปิดเมนู
+      window.addEventListener('load', closeMenu);
+      window.addEventListener('pageshow', closeMenu);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') closeMenu();
+      });
+
+      // กัน bubbling คลิกภายในเมนู
+      menu.addEventListener('click', (e) => e.stopPropagation());
+    }
+  </script>
+
+</body>
+</html>

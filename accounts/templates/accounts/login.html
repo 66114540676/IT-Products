@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% load socialaccount %}
+
+{% block title %} เข้าสู่ระบบ {% endblock %}
+
+{% block content %}
+
+<body class="min-h-screen flex flex-col bg-gray-100 text-gray-800">
+
+  <main class="flex-grow flex items-center justify-center p-6">
+    <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+      <h2 class="text-2xl font-bold text-center text-blue-600 mb-6">เข้าสู่ระบบ</h2>
+
+      {% if messages %}
+      <div class="mb-4">
+        {% for message in messages %}
+        <p class="text-red-600 text-sm">{{ message }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <div>
+          <label class="block mb-1 text-gray-700">ชื่อผู้ใช้</label>
+          <input type="text" name="username"
+            class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+        </div>
+
+        <div>
+          <label class="block mb-1 text-gray-700">รหัสผ่าน</label>
+          <input type="password" name="password"
+            class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+        </div>
+
+        <button type="submit"
+          class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition cursor-pointer">
+          เข้าสู่ระบบ
+        </button>
+      </form>
+
+      <div class="mt-4 text-center">
+        <a href="{% provider_login_url 'google' process='login' %}"
+          class="inline-block px-4 py-2 rounded bg-green-500 text-white">
+          เข้าสู่ระบบด้วย Google
+        </a>
+      </div>
+
+      <p class="mt-4 text-sm text-center">
+        ยังไม่มีบัญชี? <a href="{% url 'accounts:register' %}" class="text-blue-600 hover:underline">สมัครสมาชิก</a>
+      </p>
+
+      <p class="mt-2 text-sm text-center">
+        <a href="{% url 'accounts:home' %}" class="text-gray-600 hover:underline">← กลับสู่หน้าหลัก</a>
+      </p>
+    </div>
+  </main>
+</body>
+{% endblock %}

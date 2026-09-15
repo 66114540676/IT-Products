@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %} หน้าสินค้า {% endblock %}
+
+{% block content %}
+
+<body class="min-h-screen flex flex-col bg-gray-100 text-gray-800">
+
+  <main class="flex-grow container mx-auto px-4 py-6">
+    <h2 class="text-2xl font-bold text-blue-600 mb-6 text-center">รายการสินค้า</h2>
+
+    <div class="flex flex-col md:flex-row gap-6">
+
+      <!-- กล่องเลือกหมวดหมู่ -->
+      <aside class="bg-white p-4 rounded-lg shadow-md">
+        <h3 class="text-lg font-bold mb-4">หมวดหมู่</h3>
+        <ul class="space-y-2">
+          <!-- ทั้งหมด -->
+          <li>
+            <a href="{% url 'products:product_list' %}" class="block px-4 py-2 rounded transition
+                  {% if not request.GET.category %}
+                    bg-blue-600 text-white
+                  {% else %}
+                    bg-gray-100 hover:bg-blue-500 hover:text-white
+                  {% endif %}">
+              ทั้งหมด
+            </a>
+          </li>
+
+          <!-- loop หมวดหมู่ -->
+          {% for cat in categories %}
+          <li>
+            <a href="{% url 'products:product_list' %}?category={{ cat.id }}" class="block px-4 py-2 rounded transition
+                  {% if request.GET.category|default:'' == cat.id|stringformat:'s' %}
+                    bg-blue-600 text-white
+                  {% else %}
+                    bg-gray-100 hover:bg-blue-500 hover:text-white
+                  {% endif %}">
+              {{ cat.name }}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </aside>
+
+      <div class="w-full md:w-3/4">
+        {% if products %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          {% for product in products %}
+          <div
+            class="bg-white rounded shadow p-4 flex flex-col justify-between text-center h-full hover:shadow-lg transition">
+
+            <!-- กดรูปเพื่อดูรายละเอียด -->
+            {% if product.image %}
+            <a href="{% url 'products:product_detail' product.id %}">
+              <img src="{{ product.image.url }}" alt="{{ product.name }}"
+                class="w-50 h-50 object-cover rounded mb-3 mx-auto hover:scale-105 transition-transform duration-200">
+            </a>
+            {% endif %}
+
+            <!-- ข้อมูลสินค้า -->
+            <div class="flex-grow">
+              <h3 class="text-sm font-semibold text-blue-600 mb-1">
+                <a href="{% url 'products:product_detail' product.id %}" class="hover:underline">
+                  {{ product.name }}
+                </a>
+              </h3>
+              <p class="text-sm text-gray-700">คงเหลือ: {{ product.stock }} ชิ้น</p>
+              <p class="text-base font-bold text-green-600 mt-1">ราคา ฿{{ product.price }} บาท</p>
+            </div>
+
+            <!-- ปุ่มสั่งซื้อ -->
+            <form method="post" action="#" class="mt-4">
+              {% csrf_token %}
+              <button type="submit"
+                class="w-full bg-blue-500 text-white py-1.5 rounded hover:bg-blue-600 transition text-sm cursor-pointer">
+                สั่งซื้อ
+              </button>
+            </form>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="col-span-3 text-center text-gray-500">ไม่พบสินค้า</p>
+        {% endif %}
+      </div>
+
+  </main>
+</body>
+{% endblock %}

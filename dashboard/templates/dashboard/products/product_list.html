@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %} จัดการสินค้า {% endblock %}
+
+{% block content %}
+
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+  <main class="flex-grow container mx-auto px-4 py-10">
+    <div class="bg-white shadow-lg rounded-lg p-8">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-blue-600">รายการสินค้า</h2>
+        <a href="{% url 'dashboard:product_add' %}"
+          class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition">เพิ่มสินค้า</a>
+      </div>
+      <p class="mt-2 text-sm">
+        <a href="{% url 'dashboard:dashboard_home' %}" class="text-gray-600 hover:underline">← กลับหน้าdashboard</a>
+      </p>
+
+      <!-- ค้นหาสินค้า -->
+      <form method="get" action="{% url 'dashboard:product_list' %}" class="mb-6 flex justify-end text-gray-800">
+        <input type="text" name="q" value="{{ request.GET.q }}" placeholder=" ค้นหาสินค้า..."
+          class="px-4 py-2 w-64 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-r-lg hover:bg-blue-700 transition">
+          ค้นหา
+        </button>
+      </form>
+
+      <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+        <table class="w-full border-collapse">
+          <thead class="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+            <tr>
+              <th class="py-3 px-4 text-left">ID</th>
+              <th class="py-3 px-4 text-left">ชื่อสินค้า</th>
+              <th class="py-3 px-4 text-center">หมวดหมู่</th>
+              <th class="py-3 px-4 text-center">ราคา</th>
+              <th class="py-3 px-4 text-center">จำนวนคงเหลือ</th>
+              <th class="py-3 px-4 text-center">เพิ่มโดย</th>
+              <th class="py-3 px-4 text-center">แก้ไขล่าสุดโดย</th>
+              <th class="py-3 px-4 text-center">วันที่เพิ่ม</th>
+              <th class="py-3 px-4 text-center">แก้ไขล่าสุด</th>
+              <th class="py-3 px-4 text-center">การจัดการ</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            {% for product in products %}
+            <tr class="hover:bg-blue-50 transition">
+              <!-- ID -->
+              <td class="py-3 px-4">{{ product.id }}</td>
+
+              <!-- ชื่อสินค้า -->
+              <td class="py-3 px-4 font-medium text-gray-800">{{ product.name }}</td>
+
+              <!-- ✅ แสดงหมวดหมู่ -->
+              <td class="py-3 px-4 text-center">
+                {% if product.category %}{{ product.category.name }}{% else %}-{% endif %}
+              </td>
+
+              <!-- ราคา -->
+              <td class="py-3 px-4 text-center font-semibold text-gray-600">
+                {{ product.price }} บาท
+              </td>
+
+              <!-- สต๊อก -->
+              <td class="py-3 px-4 text-center">{{ product.stock }}</td>
+
+              <!-- เพิ่มโดย -->
+              <td class="py-3 px-4 text-center">
+                {% if product.created_by %}{{ product.created_by.username }}{% else %}-{% endif %}
+              </td>
+
+              <!-- แก้ไขล่าสุดโดย -->
+              <td class="py-3 px-4 text-center">
+                {% if product.updated_by %}{{ product.updated_by.username }}{% else %}-{% endif %}
+              </td>
+
+              <!-- วันที่เพิ่ม -->
+              <td class="py-3 px-4 text-center text-gray-600">
+                {{ product.created_at|date:"Y-m-d H:i" }}
+              </td>
+
+              <!-- วันที่แก้ไขล่าสุด -->
+              <td class="py-3 px-4 text-center text-gray-600">
+                {{ product.updated_at|date:"Y-m-d H:i" }}
+              </td>
+
+              <!-- ปุ่มจัดการ -->
+              <td class="py-3 px-4 text-center">
+                <div class="flex justify-center space-x-2">
+                  <a href="{% url 'dashboard:product_edit' product.id %}"
+                    class="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition">
+                    แก้ไข
+                  </a>
+                  <form method="post" action="{% url 'dashboard:product_delete' product.id %}"
+                    onsubmit="return confirm('คุณแน่ใจหรือไม่ที่จะลบสินค้านี้?');">
+                    {% csrf_token %}
+                    <button type="submit" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition">
+                      ลบ
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="9" class="py-6 text-center text-gray-500">ยังไม่มีสินค้าในระบบ</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+  </main>
+</body>
+{% endblock %}

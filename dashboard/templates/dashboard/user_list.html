@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}รายชื่อผู้ใช้{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto p-6 bg-white rounded shadow">
+
+  <p class="mt-2 text-sm mb-4">
+    <a href="{% url 'dashboard:dashboard_home' %}" class="text-gray-600 hover:underline">← กลับหน้าdashboard</a>
+  </p>
+
+  <h1 class="text-xl font-bold mb-4">รายชื่อผู้ใช้</h1>
+  <table class="w-full">
+    <thead>
+      <tr class="text-left border-b">
+        <th class="py-2">ชื่อผู้ใช้</th>
+        <th>อีเมล</th>
+        <th>วันที่สมัคร</th>
+        <th>สิทธิ์</th>
+        <th>เบอร์โทร</th>
+        <th>ที่อยู่</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr class="border-b">
+        <td class="py-2">{{ u.username }}</td>
+        <td>{{ u.email }}</td>
+        <td>{{ u.date_joined|date:"Y-m-d H:i" }}</td>
+        <td>
+          {% if u.is_superuser %}Superuser
+          {% elif u.is_staff %}Staff
+          {% else %}User{% endif %}
+        </td>
+        <td>{{ u.profile.phone|default:"-" }}</td>
+        <td>{{ u.profile.address|default:"-" }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6" class="py-6 text-center text-gray-500">ยังไม่มีผู้ใช้</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+
+  </table>
+</div>
+{% endblock %}
